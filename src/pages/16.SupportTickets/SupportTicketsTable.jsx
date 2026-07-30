@@ -12,6 +12,16 @@ const SupportTicketsTable = ({ tickets, onBack }) => {
       || "Unknown";
   };
 
+  const getSourceLabel = (source) => {
+    const labels = {
+      STUDENT_PORTAL: 'Student',
+      SUPERVISOR_PORTAL: 'Supervisor',
+      SCHOOL_PORTAL: 'School',
+      MANAGEMENT_PORTAL: 'Management',
+    };
+    return labels[source] || source || '—';
+  };
+
   const getWorkedBy = (ticket) => {
     if (!ticket.messages) return ticket.assignedTo?.name || 'Unassigned';
     const creatorName = getCreatorName(ticket);
@@ -43,6 +53,7 @@ const SupportTicketsTable = ({ tickets, onBack }) => {
       return {
         'Ticket ID': ticket.ticketNumber,
         'Subject': ticket.subject,
+        'Source': getSourceLabel(ticket.source),
         'Priority': ticket.priority,
         'Status': ticket.status,
         'Opened At': format(new Date(ticket.createdAt), 'yyyy-MM-dd HH:mm:ss'),
@@ -86,6 +97,7 @@ const SupportTicketsTable = ({ tickets, onBack }) => {
             <tr className="bg-gray-50 border-y border-gray-200 text-gray-700">
               <th className="py-3 px-4 font-medium">Ticket #</th>
               <th className="py-3 px-4 font-medium">Subject</th>
+              <th className="py-3 px-4 font-medium">Source</th>
               <th className="py-3 px-4 font-medium">Creator</th>
               <th className="py-3 px-4 font-medium">Status</th>
               <th className="py-3 px-4 font-medium">Priority</th>
@@ -102,10 +114,21 @@ const SupportTicketsTable = ({ tickets, onBack }) => {
                 || "Unknown";
               
               return (
-                <tr key={ticket.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="py-3 px-4 text-gray-900 font-medium">{ticket.ticketNumber}</td>
-                  <td className="py-3 px-4 text-gray-700 max-w-xs truncate">{ticket.subject}</td>
-                  <td className="py-3 px-4 text-gray-600">
+                  <tr key={ticket.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="py-3 px-4 text-gray-900 font-medium">{ticket.ticketNumber}</td>
+                    <td className="py-3 px-4 text-gray-700 max-w-xs truncate">{ticket.subject}</td>
+                    <td className="py-3 px-4">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        ticket.source === 'STUDENT_PORTAL' ? 'bg-blue-100 text-blue-700' :
+                        ticket.source === 'SUPERVISOR_PORTAL' ? 'bg-purple-100 text-purple-700' :
+                        ticket.source === 'SCHOOL_PORTAL' ? 'bg-green-100 text-green-700' :
+                        ticket.source === 'MANAGEMENT_PORTAL' ? 'bg-orange-100 text-orange-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {getSourceLabel(ticket.source)}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-gray-600">
                     <span className="block truncate">{creatorName}</span>
                   </td>
                   <td className="py-3 px-4">
@@ -145,7 +168,7 @@ const SupportTicketsTable = ({ tickets, onBack }) => {
             })}
             {tickets.length === 0 && (
               <tr>
-                <td colSpan="8" className="py-8 text-center text-gray-500">
+                <td colSpan="9" className="py-8 text-center text-gray-500">
                   No tickets found.
                 </td>
               </tr>

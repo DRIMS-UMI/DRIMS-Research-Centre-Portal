@@ -39,6 +39,17 @@ const SupportTickets = () => {
     return { name, email, phone };
   };
 
+  const getSourceInfo = (ticket) => {
+    if (!ticket?.source) return null;
+    const labels = {
+      STUDENT_PORTAL: { label: 'Student', color: 'bg-blue-100 text-blue-700' },
+      SUPERVISOR_PORTAL: { label: 'Supervisor', color: 'bg-purple-100 text-purple-700' },
+      SCHOOL_PORTAL: { label: 'School', color: 'bg-green-100 text-green-700' },
+      MANAGEMENT_PORTAL: { label: 'Management', color: 'bg-orange-100 text-orange-700' },
+    };
+    return labels[ticket.source] || { label: ticket.source, color: 'bg-gray-100 text-gray-700' };
+  };
+
   // Connect to Socket.IO
   useEffect(() => {
     const token = localStorage.getItem("umi_auth_token");
@@ -130,14 +141,8 @@ const SupportTickets = () => {
         headers: { "Content-Type": "multipart/form-data" }
       });
 
-      const sentMsg = res.data.data;
       setNewMessage("");
       setFile(null);
-
-      // Emit via socket
-      if (socket) {
-        socket.emit("support_message", { ticketId: selectedTicket.id, message: sentMsg });
-      }
 
     } catch (err) {
       toast.error("Failed to send message.");
@@ -211,12 +216,18 @@ const SupportTickets = () => {
                       >
                         <div className="flex justify-between items-start mb-1">
                           <span className="font-medium text-gray-900 text-sm truncate pr-2">{ticket.subject}</span>
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${ticket.status === 'OPEN' ? 'bg-red-100 text-red-700' :
-                              ticket.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-700' :
-                                'bg-green-100 text-green-700'
-                            }`}>
-                            {ticket.status}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            {(() => {
+                              const src = getSourceInfo(ticket);
+                              return src ? <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${src.color}`}>{src.label}</span> : null;
+                            })()}
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${ticket.status === 'OPEN' ? 'bg-red-100 text-red-700' :
+                                ticket.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-700' :
+                                  'bg-green-100 text-green-700'
+                              }`}>
+                              {ticket.status}
+                            </span>
+                          </div>
                         </div>
                         <div className="flex justify-between items-center text-xs text-gray-500">
                           <span className="flex items-center truncate"><FiUser className="mr-1" /> {getContactInfo(ticket).name}</span>
@@ -244,6 +255,10 @@ const SupportTickets = () => {
                         <span className="flex items-center"><FiUser className="mr-1.5" /> {getContactInfo(selectedTicket).name}</span>
                         <span className="flex items-center"><FiMail className="mr-1.5" /> {getContactInfo(selectedTicket).email}</span>
                         <span className="flex items-center"><FiPhone className="mr-1.5" /> {getContactInfo(selectedTicket).phone}</span>
+                        {(() => {
+                          const src = getSourceInfo(selectedTicket);
+                          return src ? <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${src.color}`}>{src.label}</span> : null;
+                        })()}
                       </div>
                     </div>
                     {selectedTicket.status !== 'RESOLVED' && (
