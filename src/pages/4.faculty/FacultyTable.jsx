@@ -224,7 +224,7 @@ const FacultyTable = ({
       header: () => <span className="text-sm">Campus</span>,
       cell: info => (
         <div className="inline-flex rounded-md py-4px px-9px  items-center justify-center whitespace-nowrap text-sm capitalize">
-          {info.row.original.campus.name}
+          {info.row.original?.campus?.name}
         </div>
       )
     },
