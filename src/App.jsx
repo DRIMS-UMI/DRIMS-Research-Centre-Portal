@@ -40,6 +40,7 @@ import NotificationsManagement from "./pages/6.notifications/NotificationsManage
 import TableBuilder from "./pages/tables";
 // PWA Component
 import PWAInstaller from "./components/PWAInstaller";
+import PWAUpdateToast from "./components/PWAUpdateToast";
 import Settings from "./pages/settings";
 import EditSchool from "./pages/5.schools/EditSchool";
 import RegisterSuperAdmin from "./pages/0.auth/RegisterSuperAdmin";
@@ -72,6 +73,7 @@ import AddCourse from "./pages/15.CourseManagement/AddCourse";
 import SpecializationManagement from "./pages/15.CourseManagement/SpecializationManagement";
 import SupportTickets from "./pages/16.SupportTickets/SupportTickets";
 import ActivityLogs from "./pages/9.roles/ActivityLogs";
+import OverdueDocuments from "./pages/17.OverdueDocuments/OverdueDocuments";
 // PublicRoute: Redirects authenticated users away from public pages (like login)
 // If user is authenticated, redirects to dashboard
 // If user is not authenticated, shows the public page content
@@ -234,6 +236,7 @@ const AppRoutes = () => {
         <Route path={"/courses/specializations/:courseId"} element={<SpecializationManagement />} />
 
         {/* Other Routes */}
+        <Route path={ROUTES.OVERDUE_DOCUMENTS} element={<OverdueDocuments />} />
         <Route path={ROUTES.NOTIFICATIONS} element={<NotificationsManagement />} />
         <Route path={"/users"} element={<UserRolesManagement />} />
         <Route path={"/users/:userId"} element={<UserManagementView />} />
@@ -256,6 +259,7 @@ const App = () => {
         <AppRoutes />
         {/* PWA Installer - shows on all pages including login */}
         <PWAInstaller />
+        <PWAUpdateToast />
       </Router>
     </AuthProvider>
   );

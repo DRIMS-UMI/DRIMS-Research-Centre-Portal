@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '../../../utils/tanstack';
 import apiRequest from '../../../utils/apiRequestUrl';
-import { getAllBooksService, getAllCampusesService, getAllDepartmentsService, getAllExaminersService, getAllFacultyService, getAllProposalsService, getAllSchoolsService, getAllStatusDefinitionsService, getAllStudentsService, getAllSupervisorsService, getAllUsersService, getAssignedStudentsService, getBookService, getCampusService, getDepartmentService, getExaminerService, getFacultyService, getLoggedInUserDetails, getPanelistsService, getProposalService, getReviewersService, getSchoolService, getStatusDefinitionService, getStudentBooksService, getStudentProposalsService, getStudentService, getStudentStatusesService, getSupervisorService, getUserService, getAllPanelistsService, getBookVivasService, getDashboardStatsService, getStatusStatisticsService, getProgressTrendsService, getNotificationsService, getProposalDefensesService, getGraduationStatisticsService, getChairpersonsService, getExternalPersonsService,  getAllResearchRequestsService, updateResearchRequestService, getEvaluationAnalyticsService, getDetailedEvaluationsService, createResearchClinicDayService, getAllResearchClinicDaysService, updateResearchClinicDayService, generateRecurringSessionsService, getResearchClinicBookingsService, updateBookingStatusService, getResearchClinicStatisticsService, deleteResearchClinicDayService, getReallocationStatisticsService, createCourseService, getAllCoursesService, updateCourseService, deleteCourseService, createSpecializationService, getAllSpecializationsService, updateSpecializationService, deleteSpecializationService, uploadStudentsService, getAllActivitiesService } from './api';
+import { getAllBooksService, getAllCampusesService, getAllDepartmentsService, getAllExaminersService, getAllFacultyService, getAllProposalsService, getAllSchoolsService, getAllStatusDefinitionsService, getAllStudentsService, getAllSupervisorsService, getAllUsersService, getAssignedStudentsService, getBookService, getCampusService, getDepartmentService, getExaminerService, getFacultyService, getLoggedInUserDetails, getPanelistsService, getProposalService, getReviewersService, getSchoolService, getStatusDefinitionService, getStudentBooksService, getStudentProposalsService, getStudentService, getStudentStatusesService, getSupervisorService, getUserService, getAllPanelistsService, getBookVivasService, getDashboardStatsService, getStatusStatisticsService, getProgressTrendsService, getNotificationsService, getProposalDefensesService, getGraduationStatisticsService, getChairpersonsService, getExternalPersonsService,  getAllResearchRequestsService, updateResearchRequestService, getEvaluationAnalyticsService, getDetailedEvaluationsService, createResearchClinicDayService, getAllResearchClinicDaysService, updateResearchClinicDayService, generateRecurringSessionsService, getResearchClinicBookingsService, updateBookingStatusService, getResearchClinicStatisticsService, deleteResearchClinicDayService, getReallocationStatisticsService, createCourseService, getAllCoursesService, updateCourseService, deleteCourseService, createSpecializationService, getAllSpecializationsService, updateSpecializationService, deleteSpecializationService, uploadStudentsService, getAllActivitiesService, getOverdueDocumentsService } from './api';
 
 export const useGetLoggedInUserDetails = () => {
   return useQuery({
@@ -787,4 +787,13 @@ export const useGetAllActivities = () => {
         queryFn: getAllActivitiesService,
         staleTime: 30000, // 30 seconds
     });
+};
+
+/* ********** OVERDUE DOCUMENTS ********** */
+export const useGetOverdueDocuments = () => {
+  return useQuery({
+    queryKey: ['overdue-documents'],
+    queryFn: getOverdueDocumentsService,
+    staleTime: 60000,
+  });
 };

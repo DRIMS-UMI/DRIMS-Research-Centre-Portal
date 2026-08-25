@@ -1514,6 +1514,16 @@ export const getAllActivitiesService = async () => {
 
 /* ********** END OF ACTIVITY LOGS ********** */
 
+/* ********** OVERDUE DOCUMENTS ********** */
+export const getOverdueDocumentsService = async () => {
+    try {
+        const response = await apiRequest.get("/management/documents/overdue");
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
 /* ********** ACMIS INTEGRATION ********** */
 export const fetchAcmisStudentService = async (registrationNumber: string) => {
     try {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PageHeader from '../../components/common/PageHeader';
-import { RiNotificationLine, RiLockLine, RiUserLine, RiGlobalLine, RiCloseLine } from 'react-icons/ri';
+import { RiNotificationLine, RiLockLine, RiUserLine, RiGlobalLine, RiCloseLine, RiInformationLine } from 'react-icons/ri';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { useAuth } from '../../store/context/AuthContext';
@@ -9,6 +9,23 @@ import { toast } from 'sonner';
 import { useGetLoggedInUserDetails } from '../../store/tanstackStore/services/queries';
 import { useMutation } from '@tanstack/react-query';
 import { updateUserProfileService, changePasswordService } from '../../store/tanstackStore/services/api';
+
+const APP_INFO = __APP_VERSION__;
+
+const formatBuildDate = (iso) => {
+  if (!iso) return 'Not available';
+  try {
+    return new Date(iso).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return iso;
+  }
+};
 
 const SettingSection = ({ icon: Icon, title, children }) => (
   <div className="bg-white rounded-lg shadow-sm p-6">
@@ -48,6 +65,7 @@ const Settings = () => {
   const { user } = useAuth();
   const { data: userData, isLoading } = useGetLoggedInUserDetails();
  
+  const [previousBuild] = useState(() => localStorage.getItem('umi_prev_app_version'));
   const [userDetails, setUserDetails] = useState({
     title: '',
     name: '',
@@ -247,6 +265,26 @@ const Settings = () => {
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
               </label>
+            </div>
+          </div>
+        </SettingSection>
+
+        {/* About */}
+        <SettingSection icon={RiInformationLine} title="About">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-semantic-text-secondary">App version</p>
+              <p className="text-sm font-medium">{APP_INFO?.version && APP_INFO.version !== '0.0.0' ? `v${APP_INFO.version}` : 'UMI Research Centre Portal'}</p>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-semantic-text-secondary">Build date</p>
+              <p className="text-sm font-medium">{formatBuildDate(APP_INFO?.build)}</p>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-semantic-text-secondary">Previous build</p>
+              <p className="text-sm font-medium">
+                {previousBuild && previousBuild !== APP_INFO?.build ? formatBuildDate(previousBuild) : 'First install'}
+              </p>
             </div>
           </div>
         </SettingSection>

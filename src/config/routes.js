@@ -70,7 +70,8 @@ export const ROUTES = {
     LIST: '/reallocation-monitoring'
   },
   ACTIVITIES: '/activities',
-  SUPPORT_TICKETS: '/support-tickets'
+  SUPPORT_TICKETS: '/support-tickets',
+  OVERDUE_DOCUMENTS: '/overdue-documents'
 };
 
 export default ROUTES;
