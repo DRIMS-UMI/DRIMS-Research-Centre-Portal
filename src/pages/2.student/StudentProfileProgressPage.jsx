@@ -23,6 +23,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import StudentProfileProgressStatusTable from "./StudentProfileProgressStatusTable.jsx";
 import StudentProfileProgressProposalTable from "./StudentProfileProgressProposalTable.jsx";
 import StudentProfileProgressStatusDrawer from "./StudentProfileProgressStatusDrawer.jsx";
@@ -36,6 +43,7 @@ import {
   updateSenateApprovalDateService,
   deregisterStudentService,
   reinstateStudentService,
+  updateStudentSupervisorRoleService,
 } from "@/store/tanstackStore/services/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -336,6 +344,23 @@ const StudentProfileProgressPage = ({ studentData }) => {
     navigate(`/students/change-supervisor/${id}?supervisorId=${supervisor.id}`);
   };
 
+  // Mutation to update a supervisor's role (Main vs Co-Supervisor)
+  const updateSupervisorRoleMutation = useMutation({
+    mutationFn: ({ supervisorId, role }) => updateStudentSupervisorRoleService(id, { supervisorId, role }),
+    onSuccess: () => {
+      toast.success("Supervisor role updated successfully");
+      queryClient.invalidateQueries(["student", id]);
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Failed to update supervisor role");
+      queryClient.invalidateQueries(["student", id]);
+    },
+  });
+
+  const handleRoleChange = (supervisorId, newRole) => {
+    updateSupervisorRoleMutation.mutate({ supervisorId, role: newRole });
+  };
+
   // TanStack Table for Supervisors
   const columnHelper = createColumnHelper();
   
@@ -353,12 +378,22 @@ const StudentProfileProgressPage = ({ studentData }) => {
       cell: (info) => {
         const supervisorId = info.getValue();
         const role = studentData?.student?.supervisorRoles?.[supervisorId];
-        const displayRole = role === "MAIN" ? "Main Supervisor" : (role === "CO_SUPERVISOR" ? "Co-Supervisor" : "Supervisor");
-        
+        const currentRole = role === "MAIN" ? "MAIN" : "CO_SUPERVISOR";
+
         return (
-          <span className="text-sm font-[Inter-Medium] text-blue-700 bg-blue-50 px-2 py-1 rounded">
-            {displayRole}
-          </span>
+          <Select
+            value={currentRole}
+            onValueChange={(value) => handleRoleChange(supervisorId, value)}
+            disabled={updateSupervisorRoleMutation.isPending}
+          >
+            <SelectTrigger className="w-[150px] h-8 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="MAIN">Main Supervisor</SelectItem>
+              <SelectItem value="CO_SUPERVISOR">Co-Supervisor</SelectItem>
+            </SelectContent>
+          </Select>
         );
       },
     }),

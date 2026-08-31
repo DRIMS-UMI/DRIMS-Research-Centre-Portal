@@ -33,7 +33,7 @@ const ChangeSupervisor = () => {
   const searchParams = new URLSearchParams(location.search);
   const supervisorIdFromUrl = searchParams.get('supervisorId');
   
-  const [isPrimary, setIsPrimary] = useState(false);
+  const [role, setRole] = useState("CO_SUPERVISOR");
   const [reason, setReason] = useState("");
   const [selectedSupervisor, setSelectedSupervisor] = useState("");
   const [supervisorToReplace, setSupervisorToReplace] = useState(supervisorIdFromUrl || "");
@@ -45,25 +45,25 @@ const ChangeSupervisor = () => {
   const { data: studentData, isLoading: isLoadingStudent } = useGetStudent(id);
   const student = studentData?.student;
   const supervisors = student?.supervisors || [];
-
-  console.log(supervisors, student)
+  const supervisorRoles = student?.supervisorRoles || {};
 
   // Set initial values based on URL params
   useEffect(() => {
     if (student && supervisorIdFromUrl) {
       const supervisor = supervisors.find(s => s.id === supervisorIdFromUrl);
       if (supervisor) {
-        setIsPrimary(supervisor.isPrimary);
+        setRole(supervisorRoles[supervisor.id] === "MAIN" ? "MAIN" : "CO_SUPERVISOR");
       }
     }
-  }, [student, supervisorIdFromUrl, supervisors]);
+  }, [student, supervisorIdFromUrl, supervisors, supervisorRoles]);
 
   const changeSupervisorMutation = useMutation({
     mutationFn: () => {
       return changeStudentSupervisorService(id, {
         oldSupervisorId: supervisorToReplace,
         newSupervisorId: selectedSupervisor,
-        reason: reason
+        reason: reason,
+        role: role
       });
     },
     onSuccess: () => {
@@ -141,7 +141,7 @@ const ChangeSupervisor = () => {
                 <SelectContent>
                   {supervisors.map((supervisor) => (
                     <SelectItem key={supervisor.id} value={supervisor.id}>
-                      {supervisor.title} {supervisor.name} ({supervisor.isPrimary ? "Primary" : "Secondary"})
+                      {supervisor.title} {supervisor.name} ({supervisorRoles[supervisor.id] === "MAIN" ? "Main" : "Co-Supervisor"})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -169,17 +169,17 @@ const ChangeSupervisor = () => {
             </div>
             
             <div>
-              <Label htmlFor="supervisorType">Supervisor Type</Label>
+              <Label htmlFor="supervisorType">Supervisor Role</Label>
               <Select 
-                value={isPrimary ? "primary" : "secondary"} 
-                onValueChange={(value) => setIsPrimary(value === "primary")}
+                value={role} 
+                onValueChange={setRole}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select supervisor type" />
+                  <SelectValue placeholder="Select supervisor role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="primary">Primary</SelectItem>
-                  <SelectItem value="secondary">Secondary</SelectItem>
+                  <SelectItem value="MAIN">Main Supervisor</SelectItem>
+                  <SelectItem value="CO_SUPERVISOR">Co-Supervisor</SelectItem>
                 </SelectContent>
               </Select>
             </div>

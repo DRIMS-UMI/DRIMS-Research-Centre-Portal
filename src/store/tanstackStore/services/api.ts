@@ -375,9 +375,18 @@ export const getAssignedStudentsService = async (supervisorId: string) => {
 };
 
 
-export const changeStudentSupervisorService = async (studentId: string, data: { oldSupervisorId: string, newSupervisorId: string, reason: string }) => {
+export const changeStudentSupervisorService = async (studentId: string, data: { oldSupervisorId: string, newSupervisorId: string, reason: string, role?: string }) => {
     try {
         const response = await apiRequest.put(`/management/students/${studentId}/change-supervisor`, data);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const updateStudentSupervisorRoleService = async (studentId: string, data: { supervisorId: string, role: string }) => {
+    try {
+        const response = await apiRequest.put(`/management/students/${studentId}/supervisor-role`, data);
         return response.data;
     } catch (error) {
         errorHandling(error);
