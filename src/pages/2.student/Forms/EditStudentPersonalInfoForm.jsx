@@ -40,7 +40,19 @@ const EditStudentPersonalInfoForm = ({ studentData, formRef, updateStudentMutati
         handleChange,
         handleBlur,
         values,
-      }) => (
+        setFieldValue,
+      }) => {
+        const handleTitleChange = (e) => {
+          handleChange(e);
+          const title = e.target.value;
+          if (title === "Mr") {
+            setFieldValue("gender", "male");
+          } else if (title === "Ms" || title === "Mrs") {
+            setFieldValue("gender", "female");
+          }
+        };
+
+        return (
         <Form className="space-y-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-semibold text-gray-900">
@@ -96,7 +108,7 @@ const EditStudentPersonalInfoForm = ({ studentData, formRef, updateStudentMutati
                 <select
                   id="title"
                   name="title"
-                  onChange={handleChange}
+                  onChange={handleTitleChange}
                   onBlur={handleBlur}
                   value={values.title}
                   className={`w-full h-9 rounded-md border ${
@@ -233,7 +245,8 @@ const EditStudentPersonalInfoForm = ({ studentData, formRef, updateStudentMutati
             </div>
           </div>
         </Form>
-      )}
+        );
+      }}
     </Formik>
   );
 };

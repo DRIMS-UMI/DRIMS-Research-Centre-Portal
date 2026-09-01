@@ -64,7 +64,18 @@ const StudentPersonalInfoForm = ({ formRef, handleNext }) => {
         handleNext()
       }}
     >
-      {({ errors, touched, handleChange, handleBlur, values, setFieldValue }) => (
+      {({ errors, touched, handleChange, handleBlur, values, setFieldValue }) => {
+        const handleTitleChange = (e) => {
+          handleChange(e);
+          const title = e.target.value;
+          if (title === "Mr") {
+            setFieldValue("gender", "male");
+          } else if (title === "Ms" || title === "Mrs") {
+            setFieldValue("gender", "female");
+          }
+        };
+
+        return (
         <Form className="space-y-6">
           <div className="flex flex-col gap-6">
             {/** Rehistration Number */}
@@ -131,7 +142,7 @@ const StudentPersonalInfoForm = ({ formRef, handleNext }) => {
                 <select
                   id="title"
                   name="title"
-                  onChange={handleChange}
+                  onChange={handleTitleChange}
                   onBlur={handleBlur}
                   value={values.title}
                   className={`w-full h-9 rounded-md border ${errors?.title ? "border-red-500" : "border-gray-200"
@@ -266,7 +277,8 @@ const StudentPersonalInfoForm = ({ formRef, handleNext }) => {
 
           </div>
         </Form>
-      )}
+        );
+      }}
     </Formik>
   );
 };
