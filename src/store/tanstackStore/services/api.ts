@@ -459,6 +459,15 @@ export const getAllStudentsService = async () => {
     }
 };
 
+export const getStudentCohortsService = async () => {
+    try {
+        const response = await apiRequest.get('/management/students/cohorts');
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
 export const uploadStudentsService = async (students: any[]) => {
     try {
         const response = await apiRequest.post('/management/students/upload', { students });

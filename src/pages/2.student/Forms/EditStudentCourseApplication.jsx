@@ -8,7 +8,8 @@ import {
   useGetAllSchools, 
   useGetAllDepartments, 
   useGetAllCourses, 
-  useGetAllSpecializations 
+  useGetAllSpecializations,
+  useGetStudentCohorts 
 } from "@/store/tanstackStore/services/queries";
 import FormErrorHandler from "@/components/FormErrorHandler/FormErrorHandler";
 
@@ -42,6 +43,8 @@ const EditStudentCourseApplication = ({ studentData, formRef, updateStudentMutat
     const { data: departments } = useGetAllDepartments(selectedSchoolId || '');
     const { data: courses } = useGetAllCourses({ campusId: selectedCampusId });
     const { data: specializations } = useGetAllSpecializations({ courseId: selectedCourseId });
+    const { data: cohortsData } = useGetStudentCohorts();
+    const existingCohorts = cohortsData?.cohorts || [];
 
     const initialAdmissionDate = studentData?.student?.admissionDate 
         ? format(parseISO(studentData.student.admissionDate), 'yyyy-MM-dd') 
@@ -56,6 +59,7 @@ const EditStudentCourseApplication = ({ studentData, formRef, updateStudentMutat
         academicYear: studentData?.student?.academicYear || '',
         studyMode: studentData?.student?.studyMode || '',
         intakePeriod: studentData?.student?.intakePeriod || '',
+        cohort: studentData?.student?.cohort || '',
         programLevel: studentData?.student?.programLevel || '',
         specialization: studentData?.student?.specializationId || studentData?.student?.specialization || '',
         completionTime: studentData?.student?.completionTime || '',
@@ -293,6 +297,25 @@ const EditStudentCourseApplication = ({ studentData, formRef, updateStudentMutat
                                 placeholder="e.g. 2024/2025"
                                 className={`w-full h-9 rounded-md border ${errors.academicYear && touched.academicYear ? "border-red-500" : "border-gray-200"} px-3 py-2 text-sm bg-gray-50`}
                             />
+                        </div>
+
+                        {/* Cohort */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Cohort (Optional)</label>
+                            <input
+                                type="text"
+                                name="cohort"
+                                value={values.cohort}
+                                onChange={handleChange}
+                                list="cohort-options"
+                                placeholder="Select or type a new cohort e.g. 2023"
+                                className={`w-full h-9 rounded-md border ${errors.cohort && touched.cohort ? "border-red-500" : "border-gray-200"} px-3 py-2 text-sm bg-gray-50`}
+                            />
+                            <datalist id="cohort-options">
+                                {existingCohorts.map((c) => (
+                                    <option key={c} value={c} />
+                                ))}
+                            </datalist>
                         </div>
 
                         {/* Completion Time */}

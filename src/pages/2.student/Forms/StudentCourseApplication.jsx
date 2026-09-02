@@ -2,7 +2,7 @@ import React from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { addYears, format, isPast } from 'date-fns';
-import { useGetAllCampuses, useGetAllSchools, useGetAllDepartments, useGetAllCourses, useGetAllSpecializations } from "@/store/tanstackStore/services/queries";
+import { useGetAllCampuses, useGetAllSchools, useGetAllDepartments, useGetAllCourses, useGetAllSpecializations, useGetStudentCohorts } from "@/store/tanstackStore/services/queries";
 import FormErrorHandler from "@/components/FormErrorHandler/FormErrorHandler";
 import { useState, useEffect } from 'react';
 
@@ -40,12 +40,15 @@ const StudentCourseApplication = ({ formRef, handleNext, createStudentMutation }
   const { data: specializations } = useGetAllSpecializations({
     courseId: selectedCourseId
   });
+  const { data: cohortsData } = useGetStudentCohorts();
+  const existingCohorts = cohortsData?.cohorts || [];
   console.log(courses)
   const initialValues = {
     course: storedData.course || '',
     academicYear: storedData.academicYear || '',
     studyMode: storedData.studyMode || '',
     intakePeriod: storedData.intakePeriod || '',
+    cohort: storedData.cohort || '',
     programLevel: storedData.programLevel || '',
     specialization: storedData.specialization || '',
     completionTime: storedData.completionTime || '',
@@ -532,6 +535,33 @@ const StudentCourseApplication = ({ formRef, handleNext, createStudentMutation }
                 </select>
                 {errors.intakePeriod && touched.intakePeriod && (
                   <div className="text-red-500 text-sm mt-1">{errors.intakePeriod}</div>
+                )}
+              </div>
+
+              {/** cohort */}
+              <div>
+                <label htmlFor="cohort" className="block text-sm font-medium text-gray-700">
+                  Cohort (Optional)
+                </label>
+                <input
+                  type="text"
+                  id="cohort"
+                  name="cohort"
+                  list="cohort-options"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.cohort}
+                  className={`w-full h-9 rounded-md border ${errors?.cohort ? "border-red-500" : "border-gray-200"
+                    } shadow-sm px-3 py-2  text-sm bg-gray-50 appearance-none`}
+                  placeholder="Select or type a new cohort e.g. 2023"
+                />
+                <datalist id="cohort-options">
+                  {existingCohorts.map((c) => (
+                    <option key={c} value={c} />
+                  ))}
+                </datalist>
+                {errors.cohort && touched.cohort && (
+                  <div className="text-red-500 text-sm mt-1">{errors.cohort}</div>
                 )}
               </div>
 
