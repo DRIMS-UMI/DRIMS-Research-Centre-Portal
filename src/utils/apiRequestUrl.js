@@ -1,13 +1,13 @@
 import { queryClient } from './tanstack'
 import axios from 'axios'
 //export const BASE_API_URL = 'http://localhost:5000/api/v1';
-export const BASE_API_URL = 'https://drims-sbx.site/api/v1';
-//export const BASE_API_URL = 'https://drimsapi.umi.ac.ug/api/v1';
+//export const BASE_API_URL = 'https://drims-sbx.site/api/v1';
+export const BASE_API_URL = 'https://drimsapi.umi.ac.ug/api/v1';
 //export const BASE_API_URL = "https://drimsapi.alero.digital/api/v1";
 //export const socketUrl = "https://drimsapi.alero.digital"
 //export const socketUrl = "localhost:5000"
-export const socketUrl = "https://drims-sbx.site"
-//export const socketUrl = "https://drimsapi.umi.ac.ug"
+//export const socketUrl = "https://drims-sbx.site"
+export const socketUrl = "https://drimsapi.umi.ac.ug"
 
 const apiRequest = axios.create({
     baseURL: BASE_API_URL,
