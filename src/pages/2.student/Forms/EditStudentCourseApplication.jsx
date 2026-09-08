@@ -46,6 +46,9 @@ const EditStudentCourseApplication = ({ studentData, formRef, updateStudentMutat
     const { data: cohortsData } = useGetStudentCohorts();
     const existingCohorts = cohortsData?.cohorts || [];
 
+    const selectedCourse = courses?.courses?.find(c => c.id === selectedCourseId) || null;
+    const isDirectMasters = !!selectedCourse?.directMasters;
+
     const initialAdmissionDate = studentData?.student?.admissionDate 
         ? format(parseISO(studentData.student.admissionDate), 'yyyy-MM-dd') 
         : extractDateFromRegNo(studentData?.student?.registrationNumber) || format(new Date(), 'yyyy-MM-dd');
@@ -80,7 +83,7 @@ const EditStudentCourseApplication = ({ studentData, formRef, updateStudentMutat
         studyMode: Yup.string().required('Study mode is required'),
         intakePeriod: Yup.string().required('Intake period is required'),
         programLevel: Yup.string().required('Program level is required'),
-        specialization: Yup.string().required('Specialization is required'),
+        specialization: isDirectMasters ? Yup.string() : Yup.string().required('Specialization is required'),
         completionTime: Yup.number().required('Completion time is required')
     });
 
@@ -156,8 +159,30 @@ const EditStudentCourseApplication = ({ studentData, formRef, updateStudentMutat
                                 value={values.course}
                                 onChange={(e) => {
                                     handleChange(e);
-                                    setSelectedCourseId(e.target.value);
+                                    const courseId = e.target.value;
+                                    setSelectedCourseId(courseId);
                                     setFieldValue('specialization', '');
+                                    setFieldValue('schoolId', '');
+                                    setSelectedSchoolId('');
+                                    setFieldValue('departmentId', '');
+
+                                    // For direct masters courses, auto-fill School and Department from the course
+                                    const selected = courses?.courses?.find(c => c.id === courseId);
+                                    if (selected?.directMasters) {
+                                        const schoolId = selected.schoolId || selected.school?.id || '';
+                                        const deptId = selected.departmentId || selected.department?.id || '';
+                                        setFieldValue('schoolId', schoolId);
+                                        setSelectedSchoolId(schoolId);
+                                        setFieldValue('departmentId', deptId);
+
+                                        // Auto-fill Duration/Completion Time from the course
+                                        if (selected.duration) {
+                                            setFieldValue('completionTime', selected.duration);
+                                            const baseDate = values.admissionDate ? new Date(values.admissionDate) : new Date();
+                                            const date = addYears(baseDate, selected.duration);
+                                            setFieldValue('expectedCompletionDate', format(date, 'yyyy-MM-dd'));
+                                        }
+                                    }
                                 }}
                                 disabled={!values.campusId}
                                 className={`w-full h-9 rounded-md border ${errors.course && touched.course ? "border-red-500" : "border-gray-200"} px-3 py-2 text-sm bg-gray-50`}
@@ -169,6 +194,11 @@ const EditStudentCourseApplication = ({ studentData, formRef, updateStudentMutat
                         </div>
 
                         {/* Specialization */}
+                        {isDirectMasters ? (
+                            <div className="flex items-center h-9 rounded-md border border-purple-200 bg-purple-50 text-sm text-purple-700 px-3">
+                                Direct Masters course &mdash; no specialization needed
+                            </div>
+                        ) : (
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Specialization</label>
                             <select
@@ -205,6 +235,7 @@ const EditStudentCourseApplication = ({ studentData, formRef, updateStudentMutat
                             </select>
                             <FormErrorHandler errors={errors.specialization} touched={touched.specialization} />
                         </div>
+                        )}
 
                         {/* School */}
                         <div>
@@ -217,7 +248,8 @@ const EditStudentCourseApplication = ({ studentData, formRef, updateStudentMutat
                                     setSelectedSchoolId(e.target.value);
                                     setFieldValue('departmentId', '');
                                 }}
-                                className={`w-full h-9 rounded-md border ${errors.schoolId && touched.schoolId ? "border-red-500" : "border-gray-200"} px-3 py-2 text-sm bg-gray-50`}
+                                disabled={isDirectMasters}
+                                className={`w-full h-9 rounded-md border ${errors.schoolId && touched.schoolId ? "border-red-500" : "border-gray-200"} px-3 py-2 text-sm bg-gray-50 ${isDirectMasters ? "cursor-not-allowed" : ""}`}
                             >
                                 <option value="">Select School</option>
                                 {schools?.schools?.filter(s => s.campusId === values.campusId).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -232,7 +264,7 @@ const EditStudentCourseApplication = ({ studentData, formRef, updateStudentMutat
                                 name="departmentId"
                                 value={values.departmentId}
                                 onChange={handleChange}
-                                disabled={!values.schoolId}
+                                disabled={!values.schoolId || isDirectMasters}
                                 className="w-full h-9 rounded-md border border-gray-200 px-3 py-2 text-sm bg-gray-50"
                             >
                                 <option value="">Select Department</option>

@@ -42,7 +42,9 @@ const StudentCourseApplication = ({ formRef, handleNext, createStudentMutation }
   });
   const { data: cohortsData } = useGetStudentCohorts();
   const existingCohorts = cohortsData?.cohorts || [];
-  console.log(courses)
+
+  const selectedCourse = courses?.courses?.find(c => c.id === selectedCourseId) || null;
+  const isDirectMasters = !!selectedCourse?.directMasters;
   const initialValues = {
     course: storedData.course || '',
     academicYear: storedData.academicYear || '',
@@ -66,7 +68,7 @@ const StudentCourseApplication = ({ formRef, handleNext, createStudentMutation }
     studyMode: Yup.string().required('Study mode is required'),
     intakePeriod: Yup.string().required('Intake period is required'),
     programLevel: Yup.string().required('Program level is required'),
-    specialization: Yup.string().required('Specialization is required'),
+    specialization: isDirectMasters ? Yup.string() : Yup.string().required('Specialization is required'),
     completionTime: Yup.string().required('Completion time is required'),
     admissionDate: Yup.date().required('Admission date is required'),
     schoolId: Yup.string().required("School is required"),
@@ -259,6 +261,27 @@ const StudentCourseApplication = ({ formRef, handleNext, createStudentMutation }
                     setFieldValue('departmentId', '');
                     setFieldValue('completionTime', '');
                     setFieldValue('expectedCompletionDate', '');
+
+                    // For direct masters courses, auto-fill School and Department from the course
+                    const selected = courses?.courses?.find(c => c.id === courseId);
+                    if (selected?.directMasters) {
+                      const schoolId = selected.schoolId || selected.school?.id || '';
+                      const deptId = selected.departmentId || selected.department?.id || '';
+                      setFieldValue('schoolId', schoolId);
+                      setSelectedSchoolId(schoolId);
+                      setFieldValue('departmentId', deptId);
+
+                      // Auto-fill Duration/Completion Time from the course
+                      if (selected.duration) {
+                        const years = selected.duration;
+                        setFieldValue('completionTime', years.toString());
+                        const completionDate = addYears(new Date(), years);
+                        setFieldValue('expectedCompletionDate', format(completionDate, 'yyyy-MM-dd'));
+                      } else {
+                        setFieldValue('completionTime', '');
+                        setFieldValue('expectedCompletionDate', '');
+                      }
+                    }
                   }}
                   onBlur={handleBlur}
                   value={values.course}
@@ -286,6 +309,11 @@ const StudentCourseApplication = ({ formRef, handleNext, createStudentMutation }
 
 
               {/** specialization */}
+              {isDirectMasters ? (
+                <div className="flex items-center h-9 rounded-md border border-purple-200 bg-purple-50 text-sm text-purple-700 px-3">
+                  Direct Masters course &mdash; no specialization needed
+                </div>
+              ) : (
               <div>
                 <label htmlFor="specialization" className="block text-sm font-medium text-gray-700">
                   Specialization (if applicable)
@@ -357,6 +385,7 @@ const StudentCourseApplication = ({ formRef, handleNext, createStudentMutation }
                   ))}
                 </select>
               </div>
+              )}
 
               {/** school */}
               <div>
@@ -386,7 +415,7 @@ const StudentCourseApplication = ({ formRef, handleNext, createStudentMutation }
                     backgroundPosition: 'right 0.5rem center',
                     backgroundSize: '1rem',
                   }}
-                  disabled={!values.campusId}
+                  disabled={!values.campusId || isDirectMasters}
                 >
                   <option value="">Select School</option>
                   {schools?.schools
@@ -426,7 +455,7 @@ const StudentCourseApplication = ({ formRef, handleNext, createStudentMutation }
                     backgroundPosition: 'right 0.5rem center',
                     backgroundSize: '1rem',
                   }}
-                  disabled={!values.schoolId}
+                  disabled={!values.schoolId || isDirectMasters}
                 >
                   <option value="">Select Department</option>
                   {departments?.departments

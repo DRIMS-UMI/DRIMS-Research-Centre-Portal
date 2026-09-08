@@ -287,6 +287,11 @@ const SpecializationManagement = () => {
         <div>
           <h1 className="text-2xl font-semibold text-gray-800">Course Specializations</h1>
           <p className="text-sm text-gray-500">{course?.code} - {course?.title}</p>
+          {course?.directMasters && (
+            <p className="text-xs text-purple-700 mt-1">
+              Direct Masters{course?.duration ? ` &middot; ${course.duration} ${course.duration === 1 ? 'Year' : 'Years'}` : ''} &middot; {course?.school?.name} &middot; {course?.department?.name}
+            </p>
+          )}
         </div>
       </div>
 
@@ -301,15 +306,23 @@ const SpecializationManagement = () => {
               <HiOutlineDocumentReport className="w-5 h-5" />
               Generate Usage Report
             </button>
-            <button
-              onClick={handleAdd}
-              className="inline-flex items-center px-4 py-2 bg-[#23388F] text-white rounded-lg text-sm font-medium hover:bg-[#2d48b8] gap-2"
-            >
-              <HiPlus className="w-5 h-5" />
-              Add Specialization
-            </button>
+            {!course?.directMasters && (
+              <button
+                onClick={handleAdd}
+                className="inline-flex items-center px-4 py-2 bg-[#23388F] text-white rounded-lg text-sm font-medium hover:bg-[#2d48b8] gap-2"
+              >
+                <HiPlus className="w-5 h-5" />
+                Add Specialization
+              </button>
+            )}
           </div>
         </div>
+
+        {course?.directMasters && (
+          <div className="mb-6 p-4 rounded-lg border border-purple-200 bg-purple-50 text-sm text-purple-700">
+            This is a direct masters course. School and department are set at the course level, so no specializations are used.
+          </div>
+        )}
 
         <div className="overflow-x-auto border border-gray-200 rounded-lg">
           <table className="min-w-full bg-white">
