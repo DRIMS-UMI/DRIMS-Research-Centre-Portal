@@ -52,6 +52,17 @@ const EditStudentPersonalInfoForm = ({ studentData, formRef, updateStudentMutati
           }
         };
 
+        const handleFullNameChange = (e) => {
+          const value = e.target.value.replace(
+            /\b[a-zA-Z]+(?:['’][a-zA-Z]+)*\b/g,
+            (word) =>
+              word === word.toUpperCase()
+                ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                : word
+          );
+          setFieldValue("fullName", value);
+        };
+
         return (
         <Form className="space-y-6">
           <div className="flex justify-between items-center mb-6">
@@ -145,7 +156,7 @@ const EditStudentPersonalInfoForm = ({ studentData, formRef, updateStudentMutati
                   type="text"
                   id="fullName"
                   name="fullName"
-                  onChange={handleChange}
+                  onChange={handleFullNameChange}
                   onBlur={handleBlur}
                   value={values.fullName}
                   className={`w-full h-9 rounded-md border ${

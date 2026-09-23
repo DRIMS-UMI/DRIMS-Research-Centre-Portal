@@ -75,6 +75,17 @@ const StudentPersonalInfoForm = ({ formRef, handleNext }) => {
           }
         };
 
+        const handleFullNameChange = (e) => {
+          const value = e.target.value.replace(
+            /\b[a-zA-Z]+(?:['’][a-zA-Z]+)*\b/g,
+            (word) =>
+              word === word.toUpperCase()
+                ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                : word
+          );
+          setFieldValue("fullName", value);
+        };
+
         return (
         <Form className="space-y-6">
           <div className="flex flex-col gap-6">
@@ -180,7 +191,7 @@ const StudentPersonalInfoForm = ({ formRef, handleNext }) => {
                   type="text"
                   id="fullName"
                   name="fullName"
-                  onChange={handleChange}
+                  onChange={handleFullNameChange}
                   onBlur={handleBlur}
                   value={values.fullName}
                   className={`w-full h-9 rounded-md border ${errors?.fullName ? "border-red-500" : "border-gray-200"
