@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { SupervisorCombobox } from "@/components/ui/supervisor-combobox";
 import {
   Select,
   SelectContent,
@@ -47,6 +48,19 @@ const ChangeSupervisor = () => {
   const student = studentData?.student;
   const supervisors = student?.supervisors || [];
   const supervisorRoles = student?.supervisorRoles || {};
+
+  const eligibleSupervisors = useMemo(
+    () =>
+      (availableSupervisors?.supervisors || []).filter(
+        (supervisor) =>
+          !supervisors.some((existing) => existing.id === supervisor.id)
+      ),
+    [availableSupervisors, supervisors]
+  );
+
+  const selectedSupervisorData = eligibleSupervisors.find(
+    (supervisor) => supervisor.id === selectedSupervisor
+  );
 
   // Set initial values based on URL params
   useEffect(() => {
@@ -152,22 +166,37 @@ const ChangeSupervisor = () => {
             
             <div>
               <Label htmlFor="newSupervisor">New Supervisor</Label>
-              <Select 
-                value={selectedSupervisor} 
-                onValueChange={setSelectedSupervisor}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select new supervisor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableSupervisors?.supervisors?.filter(s => !supervisors.some(existing => existing.id === s.id))
-                    .map((supervisor) => (
-                      <SelectItem key={supervisor.id} value={supervisor.id}>
-                        {supervisor.title} {supervisor.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+              <SupervisorCombobox
+                supervisors={eligibleSupervisors}
+                value={selectedSupervisor}
+                onChange={setSelectedSupervisor}
+              />
+              {selectedSupervisorData ? (
+                <div className="mt-2 flex items-center justify-between gap-3 rounded-md border border-accent2-200 bg-accent2-100 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-[Inter-Medium] text-gray-900">
+                      {selectedSupervisorData.title} {selectedSupervisorData.name}
+                    </p>
+                    <p className="truncate text-xs text-gray-700">
+                      {[
+                        selectedSupervisorData.department?.name,
+                        selectedSupervisorData.designation,
+                        selectedSupervisorData.campus?.name,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ") || "No department or campus assigned"}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0"
+                    onClick={() => setSelectedSupervisor("")}
+                  >
+                    Change
+                  </Button>
+                </div>
+              ) : null}
             </div>
             
             <div>
@@ -237,7 +266,7 @@ const ChangeSupervisor = () => {
             </Button>
             <Button 
               type="submit" 
-              disabled={changeSupervisorMutation.isLoading}
+              disabled={changeSupervisorMutation.isPending}
               className="bg-accent2-600 hover:bg-accent2-700"
             >
               {changeSupervisorMutation.isPending ? "Submitting..." : "Change Supervisor"}
