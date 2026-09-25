@@ -4,7 +4,8 @@ import * as Yup from "yup";
 import FormErrorHandler from "@/components/FormErrorHandler/FormErrorHandler";
 import { PhoneInput } from "@/components/ui/phone-input";
 
-
+const normalizeRegistrationNumber = (value) =>
+  String(value ?? "").replace(/\s+/g, "");
 
 const StudentPersonalInfoForm = ({ formRef, handleNext }) => {
 
@@ -28,7 +29,9 @@ const StudentPersonalInfoForm = ({ formRef, handleNext }) => {
   const initialValues = {
     title: storedData.title || "",
     fullName: storedData?.fullName || "",
-    registrationNumber: storedData?.registrationNumber || "",
+    registrationNumber: normalizeRegistrationNumber(
+      storedData?.registrationNumber
+    ),
     studentNumber: storedData?.studentNumber || "",
     email: storedData.email || "",
     phoneNumber: storedData.phoneNumber || "",
@@ -58,8 +61,14 @@ const StudentPersonalInfoForm = ({ formRef, handleNext }) => {
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={(values) => {
+        const sanitizedValues = {
+          ...values,
+          registrationNumber: normalizeRegistrationNumber(
+            values.registrationNumber
+          ),
+        };
         // Encrypt data before storing
-        const encryptedValues = encryptData(values)
+        const encryptedValues = encryptData(sanitizedValues)
         localStorage.setItem('studentPersonalInfo', encryptedValues)
         handleNext()
       }}
@@ -73,6 +82,14 @@ const StudentPersonalInfoForm = ({ formRef, handleNext }) => {
           } else if (title === "Ms" || title === "Mrs") {
             setFieldValue("gender", "female");
           }
+        };
+
+        const handleRegistrationNumberChange = (e) => {
+          handleChange(e);
+          setFieldValue(
+            "registrationNumber",
+            normalizeRegistrationNumber(e.target.value)
+          );
         };
 
         const handleFullNameChange = (e) => {
@@ -103,7 +120,7 @@ const StudentPersonalInfoForm = ({ formRef, handleNext }) => {
                   type="text"
                   id="registrationNumber"
                   name="registrationNumber"
-                  onChange={handleChange}
+                  onChange={handleRegistrationNumberChange}
                   onBlur={handleBlur}
                   value={values.registrationNumber}
                   className={`w-full h-9 rounded-md border ${errors?.registrationNumber ? "border-red-500" : "border-gray-200"
