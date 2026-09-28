@@ -1,16 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PageHeader from '../../components/common/PageHeader';
 import { RiNotificationLine, RiLockLine, RiUserLine, RiGlobalLine, RiCloseLine, RiInformationLine } from 'react-icons/ri';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, RotateCcw } from 'lucide-react';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { useAuth } from '../../store/context/AuthContext';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useGetLoggedInUserDetails } from '../../store/tanstackStore/services/queries';
 import { useMutation } from '@tanstack/react-query';
+import { useRegisterSW } from 'virtual:pwa-register/react';
+import { useWhatsNew } from '../../components/WhatsNewContext';
 import { updateUserProfileService, changePasswordService } from '../../store/tanstackStore/services/api';
 
 const APP_INFO = __APP_VERSION__;
+
+const UPDATE_CHECK_TIMEOUT = 8000;
+const UPDATE_CHECK_INTERVAL = 100;
 
 const formatBuildDate = (iso) => {
   if (!iso) return 'Not available';
@@ -65,7 +70,29 @@ const Settings = () => {
   const { user } = useAuth();
   const { data: userData, isLoading } = useGetLoggedInUserDetails();
  
+  const { openHistory } = useWhatsNew();
   const [previousBuild] = useState(() => localStorage.getItem('umi_prev_app_version'));
+
+  const [updateStatus, setUpdateStatus] = useState('idle');
+  const swSupported = typeof navigator !== 'undefined' && 'serviceWorker' in navigator;
+
+  // Instantiated purely as a listener so needRefresh flips when a new build lands.
+  // The registration used for update() comes from navigator.serviceWorker.ready instead,
+  // which is always populated regardless of whether this hook has finished mounting.
+  const {
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({ immediate: true });
+
+  const needRefreshRef = useRef(needRefresh);
+  useEffect(() => {
+    needRefreshRef.current = needRefresh;
+  }, [needRefresh]);
+
+  useEffect(() => {
+    if (!needRefresh) return;
+    setUpdateStatus((status) => (status === 'checking' ? status : 'available'));
+  }, [needRefresh]);
   const [userDetails, setUserDetails] = useState({
     title: '',
     name: '',
@@ -162,6 +189,77 @@ const Settings = () => {
       setIsSubmitting(false);
     }
   };
+
+  const handleCheckForUpdates = async () => {
+    if (!swSupported) return;
+    setUpdateStatus('checking');
+    setNeedRefresh(false);
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.update();
+
+      // registerType is 'prompt', so a new build lands as a waiting worker and the
+      // hook above flips needRefresh. Poll briefly for that rather than reporting
+      // "up to date" the instant update() resolves, which it does even when the
+      // fetched service worker is byte-identical to the active one.
+      let waited = 0;
+      while (!needRefreshRef.current && waited < UPDATE_CHECK_TIMEOUT) {
+        await new Promise((resolve) => setTimeout(resolve, UPDATE_CHECK_INTERVAL));
+        waited += UPDATE_CHECK_INTERVAL;
+      }
+
+      setUpdateStatus(needRefreshRef.current ? 'available' : 'up-to-date');
+    } catch (error) {
+      console.error('Update check failed:', error);
+      setUpdateStatus('error');
+    }
+  };
+
+  const handleApplyUpdate = async () => {
+    setUpdateStatus('applying');
+    try {
+      await updateServiceWorker(true);
+    } catch (error) {
+      console.error('Applying update failed:', error);
+    }
+    // The automatic reload is attached to a `controlling` listener that only binds when
+    // this component's own hook observes the `waiting` event. If PWAUpdateToast detected
+    // the update first that listener never attaches, so reload explicitly instead.
+    setTimeout(() => window.location.reload(), 800);
+  };
+
+  const handleHardReset = async () => {
+    if (!swSupported) return;
+    const confirmed = window.confirm(
+      'This clears the app cache and signs you out. Your records are not affected. Continue?'
+    );
+    if (!confirmed) return;
+
+    setUpdateStatus('resetting');
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister()));
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((key) => caches.delete(key)));
+      }
+    } catch (error) {
+      console.error('Cache clear failed:', error);
+    }
+    window.location.reload();
+  };
+
+  const updateBusy = ['checking', 'applying', 'resetting'].includes(updateStatus);
+  const updateButtonLabel = {
+    idle: 'Check for updates',
+    checking: 'Checking...',
+    'up-to-date': 'Check again',
+    available: 'Update now',
+    applying: 'Updating...',
+    resetting: 'Clearing...',
+    error: 'Try again',
+  }[updateStatus];
 
   return (
     <div className="p-6">
@@ -285,6 +383,54 @@ const Settings = () => {
               <p className="text-sm font-medium">
                 {previousBuild && previousBuild !== APP_INFO?.build ? formatBuildDate(previousBuild) : 'First install'}
               </p>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-semantic-text-secondary">App updates</p>
+              <button
+                className="px-4 py-2 text-sm text-primary-500 border border-primary-500 rounded-md hover:bg-blue-50 flex items-center gap-2 disabled:opacity-50 disabled:hover:bg-transparent"
+                onClick={updateStatus === 'available' ? handleApplyUpdate : handleCheckForUpdates}
+                disabled={!swSupported || updateBusy}
+              >
+                {updateBusy && <Loader2 className="h-4 w-4 animate-spin" />}
+                {updateButtonLabel}
+              </button>
+            </div>
+            {updateStatus === 'up-to-date' && (
+              <p className="text-xs text-semantic-text-secondary">
+                You&apos;re on the latest version.
+              </p>
+            )}
+            {updateStatus === 'error' && (
+              <p className="text-xs text-red-600">
+                Could not reach the update service. Check your connection and try again.
+              </p>
+            )}
+            {!swSupported && (
+              <p className="text-xs text-semantic-text-secondary">
+                This browser manages app updates automatically.
+              </p>
+            )}
+            {swSupported && (
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-sm text-semantic-text-secondary">Still not updating?</p>
+                <button
+                  className="text-sm text-semantic-text-secondary hover:text-primary-500 flex items-center gap-1.5"
+                  onClick={handleHardReset}
+                  disabled={updateBusy}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Clear cache &amp; reload
+                </button>
+              </div>
+            )}
+            <div className="flex items-center justify-between pt-1">
+              <p className="text-sm text-semantic-text-secondary">Release notes</p>
+              <button
+                className="px-4 py-2 text-sm text-primary-500 border border-primary-500 rounded-md hover:bg-blue-50"
+                onClick={openHistory}
+              >
+                What&apos;s new
+              </button>
             </div>
           </div>
         </SettingSection>

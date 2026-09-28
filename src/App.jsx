@@ -41,6 +41,7 @@ import TableBuilder from "./pages/tables";
 // PWA Component
 import PWAInstaller from "./components/PWAInstaller";
 import PWAUpdateToast from "./components/PWAUpdateToast";
+import { WhatsNewProvider } from "./components/WhatsNew";
 import Settings from "./pages/settings";
 import EditSchool from "./pages/5.schools/EditSchool";
 import RegisterSuperAdmin from "./pages/0.auth/RegisterSuperAdmin";
@@ -254,14 +255,16 @@ const AppRoutes = () => {
 
 const App = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <AppRoutes />
-        {/* PWA Installer - shows on all pages including login */}
-        <PWAInstaller />
-        <PWAUpdateToast />
-      </Router>
-    </AuthProvider>
+    <WhatsNewProvider>
+      <AuthProvider>
+        <Router>
+          <AppRoutes />
+          {/* PWA Installer - shows on all pages including login */}
+          <PWAInstaller />
+          <PWAUpdateToast />
+        </Router>
+      </AuthProvider>
+    </WhatsNewProvider>
   );
 };
 
