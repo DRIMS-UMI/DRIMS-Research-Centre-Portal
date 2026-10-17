@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { queryClient } from '../../utils/tanstack';
+import apiRequest from '../../utils/apiRequestUrl';
 
 const AuthContext = createContext(null);
 
@@ -23,6 +24,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // Revoke the token server-side. Fire-and-forget: local sign-out must not wait on the network.
+    const currentToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (currentToken) {
+      apiRequest
+        .post('/management/logout', null, { headers: { Authorization: `Bearer ${currentToken}` } })
+        .catch(() => {});
+    }
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     localStorage.removeItem('role');
     queryClient.clear();
