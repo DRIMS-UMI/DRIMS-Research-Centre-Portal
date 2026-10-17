@@ -71,7 +71,8 @@ export const ROUTES = {
   },
   ACTIVITIES: '/activities',
   SUPPORT_TICKETS: '/support-tickets',
-  OVERDUE_DOCUMENTS: '/overdue-documents'
+  OVERDUE_DOCUMENTS: '/overdue-documents',
+  SYSTEM_REPORT: '/system-report'
 };
 
 export default ROUTES;

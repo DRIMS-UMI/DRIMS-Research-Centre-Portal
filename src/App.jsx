@@ -75,6 +75,7 @@ import SpecializationManagement from "./pages/15.CourseManagement/Specialization
 import SupportTickets from "./pages/16.SupportTickets/SupportTickets";
 import ActivityLogs from "./pages/9.roles/ActivityLogs";
 import OverdueDocuments from "./pages/17.OverdueDocuments/OverdueDocuments";
+import SystemReport from "./pages/18.SystemReport/SystemReport";
 // PublicRoute: Redirects authenticated users away from public pages (like login)
 // If user is authenticated, redirects to dashboard
 // If user is not authenticated, shows the public page content
@@ -242,6 +243,7 @@ const AppRoutes = () => {
         <Route path={"/users"} element={<UserRolesManagement />} />
         <Route path={"/users/:userId"} element={<UserManagementView />} />
         <Route path={ROUTES.ACTIVITIES} element={<ActivityLogs />} />
+        <Route path={ROUTES.SYSTEM_REPORT} element={<SystemReport />} />
         <Route path={ROUTES.SUPPORT_TICKETS} element={<SupportTickets />} />
         <Route path={ROUTES.TABLES} element={<TableBuilder />} />
         <Route path={ROUTES.SETTINGS} element={<Settings />} />

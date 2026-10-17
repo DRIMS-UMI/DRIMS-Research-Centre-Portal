@@ -15,7 +15,8 @@ import {
   RiBook2Line,
   RiHistoryLine,
   RiMessage3Line,
-  RiAlarmWarningLine
+  RiAlarmWarningLine,
+  RiShieldCheckLine
 } from 'react-icons/ri';
 import { useGetLoggedInUserDetails } from '../../store/tanstackStore/services/queries';
 import { HiOutlineUserGroup, HiOutlineAcademicCap } from 'react-icons/hi';
@@ -42,6 +43,7 @@ const menuItems = {
     { name: 'Graduation Statistics', icon: HiOutlineAcademicCap, path: '/graduation' },
     { name: 'User Roles Management', icon: HiOutlineUserGroup, path: '/users' },
     { name: 'System Activity Logs', icon: RiHistoryLine, path: '/activities' },
+    { name: 'System Status Report', icon: RiShieldCheckLine, path: '/system-report' },
     { name: 'Status Management', icon: RiFileListLine, path: '/status' },
     { name: 'Settings', icon: RiSettings5Line, path: '/settings' },
 
@@ -88,6 +90,7 @@ const NavigationMenu = () => {
   const filteredOtherOptions = menuItems.otherOptions.filter(item => {
     if (item.name === 'User Roles Management') return role === 'SUPERADMIN' || role === 'AUDITOR';
     if (item.name === 'System Activity Logs') return role === 'SUPERADMIN' || role === 'AUDITOR';
+    if (item.name === 'System Status Report') return role === 'SUPERADMIN' || role === 'AUDITOR';
     return true;
   });
 

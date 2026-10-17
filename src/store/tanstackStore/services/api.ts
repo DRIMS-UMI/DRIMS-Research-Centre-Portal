@@ -1542,6 +1542,25 @@ export const getOverdueDocumentsService = async () => {
     }
 };
 
+/* ********** SYSTEM REPORT ********** */
+export const getSystemReportService = async (from: string, to: string) => {
+    try {
+        const response = await apiRequest.get("/management/system-report", { params: { from, to } });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const createBackupRecordService = async (data: any) => {
+    try {
+        const response = await apiRequest.post("/management/system-report/backups", data);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
 /* ********** ACMIS INTEGRATION ********** */
 export const fetchAcmisStudentService = async (registrationNumber: string) => {
     try {
