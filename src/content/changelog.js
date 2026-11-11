@@ -8,6 +8,14 @@
 // can never see notes that disagree with the code they are running.
 export const CHANGELOG = [
   {
+    version: '2.2.5',
+    date: '2026-11-11',
+    notes: [
+      'A student\'s User Access tab now has a "Send reset link" button that emails them a link to choose their own password.',
+      'The System Status Report now counts student password resets: requested, sent by staff, and completed.',
+    ],
+  },
+  {
     version: '2.2.3',
     date: '2026-09-28',
     notes: [
