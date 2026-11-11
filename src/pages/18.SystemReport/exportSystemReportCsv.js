@@ -100,6 +100,9 @@ export const exportSystemReportCsv = (report) => {
     ['Login rate limit per IP', `${security.session.rateLimits.loginPerIp.limit} / ${security.session.rateLimits.loginPerIp.windowMinutes} min`],
     ['Logouts (tokens revoked)', security.session.logouts],
     ['Deactivations (sessions revoked)', security.session.deactivationRevocations],
+    ['Student password resets requested', security.session.passwordResets?.requested ?? ''],
+    ['Student password reset links sent by admin', security.session.passwordResets?.sentByAdmin ?? ''],
+    ['Student password resets completed', security.session.passwordResets?.completed ?? ''],
   ]);
 
   add('17_rbac_matrix.csv', ['Method', 'Path', 'Authenticated', 'Allowed roles', 'Auditor read-only guard', 'Access'],

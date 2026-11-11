@@ -348,6 +348,7 @@ const SecuritySection = ({ security, rbac }) => {
               ['Login rate limit', `${rl.login.limit} failed / ${rl.login.windowMinutes} min per IP + email; ${rl.loginPerIp.limit} / ${rl.loginPerIp.windowMinutes} min per IP`],
               ['Logouts in period', fmtNumber(security.session.logouts)],
               ['Deactivated accounts signed out', fmtNumber(security.session.deactivationRevocations)],
+              ['Student password resets (requested / sent by admin / completed)', security.session.passwordResets ? `${fmtNumber(security.session.passwordResets.requested)} / ${fmtNumber(security.session.passwordResets.sentByAdmin)} / ${fmtNumber(security.session.passwordResets.completed)}` : '—'],
             ]}
           />
         </CardContent>

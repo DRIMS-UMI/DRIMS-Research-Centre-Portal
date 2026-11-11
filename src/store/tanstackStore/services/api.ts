@@ -422,6 +422,15 @@ export const updateStudentService = async (studentId: string, data: any) => {
     }
 };
 
+export const sendStudentPasswordResetService = async (studentId: string) => {
+    try {
+        const response = await apiRequest.post(`/management/students/${studentId}/send-password-reset`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
 export const changeStudentPasswordService = async (studentId: string, data: any) => {
     try {
         const response = await apiRequest.put(`/management/students/${studentId}/password`, data);

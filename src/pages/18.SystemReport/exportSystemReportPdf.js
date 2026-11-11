@@ -393,6 +393,7 @@ class ReportPdf {
       ['Login rate limit', `${rl.login.limit} failed attempts / ${rl.login.windowMinutes} min per ${rl.login.keyedBy.replace(', failed attempts only', '')}; ${rl.loginPerIp.limit} attempts / ${rl.loginPerIp.windowMinutes} min per IP`],
       ['Logouts (tokens revoked)', fmtNumber(security.session.logouts)],
       ['Deactivated accounts signed out', fmtNumber(security.session.deactivationRevocations)],
+      ['Student password resets (requested / by admin / completed)', security.session.passwordResets ? `${fmtNumber(security.session.passwordResets.requested)} / ${fmtNumber(security.session.passwordResets.sentByAdmin)} / ${fmtNumber(security.session.passwordResets.completed)}` : '-'],
       ['Accounts signing in from 5+ IPs', fmtNumber(security.multiIpAccounts.length)],
     ]);
   }
